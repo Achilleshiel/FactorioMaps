@@ -217,17 +217,17 @@ def auto(*args):
 	def parseArg(arg):
 		if arg[0:2] != "--":
 			return True
-		key = arg[2:].split("=",2)[0].lower()
+		valuekey = arg[2:].split("=",2)
+		key = valuekey[0].lower()
+		value = valuekey[1] if len(valuekey)>1 else ""
 		if key in kwargs:
 			changedKwargs.append(key)
-			if isinstance(kwargs[key], list):
-				kwargs[key].append(arg[2:].split("=",2)[1])
+			if isinstance(kwargs[key], bool):
+				kwargs[key] = False if re.match(r'^(false|0)$',value,re.IGNORECASE) else True
+			elif isinstance(kwargs[key], list) and len(valuekey)>1:
+				kwargs[key].append(value) 
 			else:
-				kwargs[key] = arg[2:].split("=",2)[1].lower() if len(arg[2:].split("=",2)) > 1 else True
-				if kwargs[key] == "true":
-					kwargs[key] = True
-				if kwargs[key] == "false":
-					kwargs[key] = False
+				kwargs[key] = value
 		else:
 			print(f'Bad flag: "{key}"')
 			raise ValueError(f'Bad flag: "{key}"')
